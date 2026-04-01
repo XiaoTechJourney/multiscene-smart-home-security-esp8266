@@ -128,13 +128,23 @@ At the moment, this repository mainly serves as a public-facing project overview
 
 ### 🖼️ Selected Thesis Figures
 
-The figures already embedded above were chosen because they communicate the project most clearly on a GitHub landing page:
+<p align="center">
+  <img src="docs/assets/system_block_diagram_thesis.png" width="720" alt="Overall design block diagram from the thesis" />
+</p>
 
-- 🧩 Overall system block diagram Figure 1
-- 📈 Fuzzy membership curves for gas and temperature interpretation
-- 🌐 Fuzzy surface showing the fire-risk output trend
+<p align="center"><em>図 1 整機設計ブロック図</em></p>
 
-Other thesis images that are also suitable for future expansion include the fire alarm flowchart, mobile push-notification screenshots, and real-device demo photos.
+<p align="center">
+  <img src="docs/assets/fuzzy_memberships.png" width="900" alt="Fuzzy membership functions" />
+</p>
+
+<p align="center"><em>図 2 ファジィメンバーシップ関数</em></p>
+
+<p align="center">
+  <img src="docs/assets/fuzzy_surface.png" width="640" alt="Fuzzy surface" />
+</p>
+
+<p align="center"><em>図 3 ファジィ曲面</em></p>
 
 ### 📡 MQTT Topic Layout
 
