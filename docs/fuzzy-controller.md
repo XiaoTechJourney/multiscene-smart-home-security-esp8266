@@ -1,62 +1,81 @@
-# 模糊控制器说明与修正
+<a id="top"></a>
 
-## 1. 设计目标
+<div align="center">
+  <h1>🔥 Fuzzy Fire Controller</h1>
+  <p><strong>Design Notes and Implementation Corrections</strong></p>
+  <p>Bilingual reference for the fuzzy fire-risk model used in the sensor node.</p>
+  <p>
+    <a href="#jp"><kbd>🇯🇵 日本語版</kbd></a>
+    <a href="#en"><kbd>🇺🇸 English Version</kbd></a>
+  </p>
+</div>
 
-本系统使用 **MQ-2 可燃气体浓度** 与 **DHT11 温度** 作为输入，输出 `0 ~ 100` 的火灾风险指数，用于减少单一阈值法带来的误报。
+---
 
-## 2. 输入 / 输出模糊集合
+<a id="jp"></a>
 
-### 2.1 有害气体（0 ~ 5）
+## 🇯🇵 日本語版
 
-- `LG`：Low Gas
-- `MG`：Medium Gas
-- `HG`：High Gas
+[<kbd>⬇️ English へ移動</kbd>](#en)
 
-对应隶属函数：
+## 1. 設計目標
 
-- `LG`：左肩型，区间 `[0, 3.5]`
-- `MG`：三角型，顶点 `3.5`
-- `HG`：右肩型，区间 `[3.5, 5]`
+本システムでは **MQ-2 の可燃性ガス濃度** と **DHT11 の温度** を入力とし、`0 ~ 100` の火災リスク指数を出力します。  
+単一しきい値だけに頼る方法より誤報を減らすことが目的です。
+
+## 2. 入力 / 出力のファジィ集合
+
+### 2.1 有害ガス（0 ~ 5）
+
+- `LG`: Low Gas
+- `MG`: Medium Gas
+- `HG`: High Gas
+
+対応するメンバーシップ関数:
+
+- `LG`: 左肩型、区間 `[0, 3.5]`
+- `MG`: 三角型、頂点 `3.5`
+- `HG`: 右肩型、区間 `[3.5, 5]`
 
 ### 2.2 温度（-10 ~ 80 ℃）
 
-- `LT`：Low Temperature
-- `MT`：Medium Temperature
-- `HT`：High Temperature
+- `LT`: Low Temperature
+- `MT`: Medium Temperature
+- `HT`: High Temperature
 
-对应隶属函数：
+対応するメンバーシップ関数:
 
-- `LT`：左肩型，区间 `[-10, 30]`
-- `MT`：三角型，顶点 `30`
-- `HT`：右肩型，区间 `[30, 80]`
+- `LT`: 左肩型、区間 `[-10, 30]`
+- `MT`: 三角型、頂点 `30`
+- `HT`: 右肩型、区間 `[30, 80]`
 
-### 2.3 输出火灾指数（0 ~ 100）
+### 2.3 出力火災指数（0 ~ 100）
 
-- `VL`：Very Low
-- `L`：Low
-- `M`：Medium
-- `H`：High
-- `VH`：Very High
+- `VL`: Very Low
+- `L`: Low
+- `M`: Medium
+- `H`: High
+- `VH`: Very High
 
-对应输出隶属函数：
+対応する出力メンバーシップ関数:
 
-- `VL`：左肩型 `[0, 25]`
-- `L`：三角型 `0 / 25 / 50`
-- `M`：三角型 `25 / 50 / 75`
-- `H`：三角型 `50 / 75 / 100`
-- `VH`：右肩型 `[75, 100]`
+- `VL`: 左肩型 `[0, 25]`
+- `L`: 三角型 `0 / 25 / 50`
+- `M`: 三角型 `25 / 50 / 75`
+- `H`: 三角型 `50 / 75 / 100`
+- `VH`: 右肩型 `[75, 100]`
 
-## 3. 规则表
+## 3. ルール表
 
-按照论文中的规则表，采用 **温度为行、气体浓度为列** 的规则矩阵：
+論文中のルール表に従い、**温度を行、ガス濃度を列** とするルール行列を使用します。
 
-| 温度 \ 气体 | LG | MG | HG |
-|---|---:|---:|---:|
+| 温度 \ ガス | LG | MG | HG |
+| --- | ---: | ---: | ---: |
 | LT | VL | M | H |
-| MT | L  | M | H |
-| HT | M  | H | VH |
+| MT | L | M | H |
+| HT | M | H | VH |
 
-在代码中映射为：
+コード上では次のように対応しています。
 
 ```cpp
 // row = temperature set, col = gas set
@@ -67,53 +86,115 @@ static const int kRules[3][3] = {
 };
 ```
 
-## 4. 为什么要重写原附录中的 Fuzzy() 函数
+## 4. サンプル結果
 
-原附录代码里，模糊控制部分存在几个实质性问题：
+代表的な入力に対して次のような出力になります。
 
-### 4.1 规则表索引方向错误
-原代码将 `gas` 放在第一维、`temperature` 放在第二维直接取 `Rule[Xn][Yn]`，这与论文中的规则表布局不一致。
+| MQ-2 | 温度 | 火災指数 | 説明 |
+| ---: | ---: | ---: | --- |
+| 1.40 | 22.0 | ≈ 34.9 | 通常時の低リスク寄り |
+| 2.50 | 35.0 | ≈ 45.3 | 火災疑い、確認を促すレベル |
+| 4.45 | 30.2 | ≈ 65.2 | 緊急火災レベル |
 
-### 4.2 赋值误写成比较
-原代码中存在：
+
+## 7. コード位置
+
+- ヘッダ: `firmware/sensor_node/fuzzy_fire_controller.h`
+- 実装: `firmware/sensor_node/fuzzy_fire_controller.cpp`
+- 可視化 / シミュレーションスクリプト: `tools/fuzzy_surface.py`
+
+[<kbd>⬇️ English Section</kbd>](#en)
+
+---
+
+<a id="en"></a>
+
+## 🇺🇸 English Version
+
+[<kbd>⬆️ Back to Japanese</kbd>](#jp) [<kbd>⬆️ Top</kbd>](#top)
+
+## 1. Design Goal
+
+This system uses **MQ-2 combustible gas concentration** and **DHT11 temperature** as inputs, then outputs a fire-risk score from `0 ~ 100`.  
+The goal is to reduce false alarms compared with a single-threshold approach.
+
+## 2. Fuzzy Input / Output Sets
+
+### 2.1 Harmful Gas (0 ~ 5)
+
+- `LG`: Low Gas
+- `MG`: Medium Gas
+- `HG`: High Gas
+
+Corresponding membership functions:
+
+- `LG`: left-shoulder function over `[0, 3.5]`
+- `MG`: triangular function with peak at `3.5`
+- `HG`: right-shoulder function over `[3.5, 5]`
+
+### 2.2 Temperature (-10 ~ 80 C)
+
+- `LT`: Low Temperature
+- `MT`: Medium Temperature
+- `HT`: High Temperature
+
+Corresponding membership functions:
+
+- `LT`: left-shoulder function over `[-10, 30]`
+- `MT`: triangular function with peak at `30`
+- `HT`: right-shoulder function over `[30, 80]`
+
+### 2.3 Output Fire Index (0 ~ 100)
+
+- `VL`: Very Low
+- `L`: Low
+- `M`: Medium
+- `H`: High
+- `VH`: Very High
+
+Corresponding output membership functions:
+
+- `VL`: left-shoulder function `[0, 25]`
+- `L`: triangular function `0 / 25 / 50`
+- `M`: triangular function `25 / 50 / 75`
+- `H`: triangular function `50 / 75 / 100`
+- `VH`: right-shoulder function `[75, 100]`
+
+## 3. Rule Table
+
+Following the thesis rule table, the rule matrix is organized with **temperature as rows and gas concentration as columns**.
+
+| Temperature \ Gas | LG | MG | HG |
+| --- | ---: | ---: | ---: |
+| LT | VL | M | H |
+| MT | L | M | H |
+| HT | M | H | VH |
+
+In code, that mapping becomes:
 
 ```cpp
-if (ZUmax[3] = ZUmax[2])
+// row = temperature set, col = gas set
+static const int kRules[3][3] = {
+  {0, 2, 3},
+  {1, 2, 3},
+  {2, 3, 4}
+};
 ```
 
-这里是赋值，不是比较，会直接破坏逻辑判断。
+## 4. Example Outputs
 
-### 4.3 反模糊过程不完整
-原代码只围绕“最大隶属度 / 次大隶属度”做简化处理，而不是对聚合后的输出模糊集执行标准 centroid 反模糊。
+Several representative inputs produce the following outputs.
 
-### 4.4 边界条件不稳定
-原代码对边界值与区间外值的处理不完整，容易造成未初始化值参与计算。
+| MQ-2 | Temperature | Fire Index | Notes |
+| ---: | ---: | ---: | --- |
+| 1.40 | 22.0 | ≈ 34.9 | Lower-risk normal condition |
+| 2.50 | 35.0 | ≈ 45.3 | Suspected fire, prompts confirmation |
+| 4.45 | 30.2 | ≈ 65.2 | Emergency fire condition |
 
-## 5. 当前实现采用的正确方法
+## 7. Code Locations
 
-现在仓库中 `fuzzy_fire_controller.cpp` 使用：
+- Header: `firmware/sensor_node/fuzzy_fire_controller.h`
+- Implementation: `firmware/sensor_node/fuzzy_fire_controller.cpp`
+- Simulation script: `tools/fuzzy_surface.py`
 
-- **Mamdani 推理**
-- 前件合成：`min`
-- 后件聚合：`max`
-- 反模糊：**centroid / center of gravity**
-
-这是一种更标准、更容易解释、也更适合论文展示和 GitHub 展示的实现方式。
-
-## 6. 示例结果
-
-当前实现下，几个代表性输入的输出如下：
-
-| MQ-2 | 温度 | 火灾指数 | 说明 |
-|---:|---:|---:|---|
-| 1.40 | 22.0 | ≈ 34.9 | 正常偏低风险 |
-| 2.50 | 35.0 | ≈ 45.3 | 疑似火情，触发求证 |
-| 4.45 | 30.2 | ≈ 65.2 | 紧急火情 |
-
-其中 `MQ-2 = 2.5, DHT11 = 35` 的输出约 `45.3`，与论文中图示案例一致。
-
-## 7. 代码位置
-
-- 头文件：`firmware/sensor_node/fuzzy_fire_controller.h`
-- 实现：`firmware/sensor_node/fuzzy_fire_controller.cpp`
-- 仿真脚本：`tools/fuzzy_surface.py`
+[<kbd>⬆️ Back to Japanese</kbd>](#jp) [<kbd>⬆️ Top</kbd>](#top)

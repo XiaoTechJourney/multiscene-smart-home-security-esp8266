@@ -1,46 +1,84 @@
-# 引脚规划建议
+<a id="top"></a>
 
-> 下面的引脚分配基于你的论文附录代码进行整理，并保持和原设计尽量一致。  
-> 如果你实际焊接版本不同，只需要改各节点的 `config.h`。
+<div align="center">
+  <h1>📌 Pin Map Guide</h1>
+  <p><strong>ESP8266 Node Wiring Reference</strong></p>
+  <p>Recommended pin assignments for the sensor, control, and broadcast nodes.</p>
+  <p>
+    <a href="#jp"><kbd>🇯🇵 日本語版</kbd></a>
+    <a href="#en"><kbd>🇺🇸 English Version</kbd></a>
+  </p>
+</div>
+
+---
+
+<a id="jp"></a>
+
+## 🇯🇵 日本語版
+
+[<kbd>⬇️ English へ移動</kbd>](#en)
+
+## 1. センサーノード
+
+| 機能 | ピン |
+| --- | --- |
+| DHT11 データ | `D1` |
+| PIR 人感センサ | `D5` |
+| ドアセンサ / リードスイッチ | `D6` |
+| MQ-2 アナログ入力 | `A0` |
+
+## 2. 制御ノード
+
+| 機能 | ピン |
+| --- | --- |
+| 433 MHz 送信 | `D1` |
+| サーボ | `D2` |
+| リレー | `D4` |
+
+## 3. 放送ノード
+
+| 機能 | ピン |
+| --- | --- |
+| TTS RX | `D5` |
+| TTS TX | `D6` |
+| 警告ランプ | `D1` |
+
+
+[<kbd>⬇️ English Section</kbd>](#en)
+
+---
+
+<a id="en"></a>
+
+## 🇺🇸 English Version
+
+[<kbd>⬆️ Back to Japanese</kbd>](#jp) [<kbd>⬆️ Top</kbd>](#top)
+
 
 ## 1. Sensor Node
 
-| 功能 | 引脚 |
-|---|---|
-| DHT11 数据引脚 | `D1` |
-| PIR 人体红外 | `D5` |
-| 门磁 / 干簧管 | `D6` |
-| MQ-2 模拟输入 | `A0` |
+| Function | Pin |
+| --- | --- |
+| DHT11 data line | `D1` |
+| PIR motion sensor | `D5` |
+| Door sensor / reed switch | `D6` |
+| MQ-2 analog input | `A0` |
 
 ## 2. Control Node
 
-| 功能 | 引脚 |
-|---|---|
-| 433 发射 | `D1` |
-| 舵机 | `D2` |
-| 继电器 | `D4` |
+| Function | Pin |
+| --- | --- |
+| 433 MHz transmitter | `D1` |
+| Servo | `D2` |
+| Relay | `D4` |
 
 ## 3. Broadcast Node
 
-| 功能 | 引脚 |
-|---|---|
+| Function | Pin |
+| --- | --- |
 | TTS RX | `D5` |
 | TTS TX | `D6` |
-| 告警灯 | `D1` |
+| Alarm lamp | `D1` |
 
-## 4. 说明
 
-### 门磁输入
-建议使用 `INPUT_PULLUP`，并在 `config.h` 中配置触发电平。
-
-### 继电器
-很多常见继电器模块为**低电平触发**，所以代码中将触发电平配置化，不写死。
-
-### 舵机角度
-建议根据你实际阀门开闭动作，调整：
-
-- `SERVO_OPEN_ANGLE`
-- `SERVO_CLOSE_ANGLE`
-
-### 433 编码
-不同卷闸 / 插座 / 遥控模块的编码不同，请在 `config.h` 中填入你自己的编码。
+[<kbd>⬆️ Back to Japanese</kbd>](#jp) [<kbd>⬆️ Top</kbd>](#top)
